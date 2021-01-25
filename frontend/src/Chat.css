@@ -1,0 +1,13 @@
+.chat p {
+  margin: 0;
+  padding: 5px;
+  color: black;
+}
+
+.chat p:nth-child(even) {
+  background-color: #cce0f0;
+}
+
+.chat p:hover {
+  background-color: #ffb3b3;
+}
