@@ -48,3 +48,7 @@ button {
 .bg-red {
   background-color: red;
 }
+
+#type {
+  background-color: lightgrey;
+}

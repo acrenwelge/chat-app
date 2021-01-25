@@ -6,12 +6,21 @@ import './Chat.css';
 export default function Chat(props) {
   const [messages, setMessages] = useState([]);
   const [userMsg, setUserMsg] = useState('');
+  const [userTyping, setUserTyping] = useState(null);
 
   useEffect(() => {
     socket.on('chat message', (msg) => {
       console.log(`received msg: ${JSON.stringify(msg)}`);
       setMessages(messages.concat(msg));
     });
+    socket.on('typing', (username) => {
+      setUserTyping(username);
+    });
+    socket.on('stop typing', (username) => {
+      if (userTyping === username) {
+        setUserTyping(null);
+      }
+    })
     socket.on('disconnect', () => {
       socket.removeAllListeners();
     });
@@ -34,8 +43,14 @@ export default function Chat(props) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMsg();
+      socket.emit('stop typing');
     } else {
       setUserMsg(e.target.value)
+    }
+    if (userMsg.trim().length > 1) {
+      socket.emit('typing');
+    } else if (userMsg.trim().length === 0) {
+      socket.emit('stop typing');
     }
   }
 
@@ -50,6 +65,7 @@ export default function Chat(props) {
         <p key={i} >
           <Message msg={msg} />
         </p>)}
+      {userTyping && <p id="type"><em><strong>{userTyping}</strong> is typing...</em></p>}
     </div>
     <div className="message">
       <textarea placeholder="What's on your mind?"
