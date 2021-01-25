@@ -1,19 +1,14 @@
 import './App.css';
 import {useState} from 'react';
+import socket from './socket.js';
 import Chat from './Chat.js';
 
 function App() {
   const [displayChat, setDisplayChat] = useState(false);
   const [username, setUsername] = useState('');
 
-  // useEffect(() => {
-  //   fetch("http://localhost:8080/messages")
-  //     .then(resp => resp.json())
-  //     .then(data => setMessages(data))
-  //     .catch(e => console.error(e));
-  // }, []);
-
   let enableChat = (e) => {
+    socket.emit('join chat', {username: username});
     setDisplayChat(true);
   }
 
@@ -26,7 +21,7 @@ function App() {
   return (
     <main className="container">
       <h1>Socket.io App</h1>
-      {displayChat ? <Chat username={username}/> : usernamePrompt}
+      {displayChat ? <Chat username={username} leaveChat={(e) => setDisplayChat(false)}/> : usernamePrompt}
     </main>
   );
 }

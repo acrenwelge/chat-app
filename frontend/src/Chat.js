@@ -8,7 +8,6 @@ export default function Chat(props) {
   const [userMsg, setUserMsg] = useState('');
 
   useEffect(() => {
-    socket.emit('join chat', {username: props.username});
     socket.on('chat message', (msg) => {
       console.log(`received msg: ${JSON.stringify(msg)}`);
       setMessages(messages.concat(msg));
@@ -16,15 +15,33 @@ export default function Chat(props) {
     socket.on('disconnect', () => {
       socket.removeAllListeners();
     });
-    return () => { socket.off('chat message') }
+    return () => {
+      socket.off('chat message');
+    }
   });
 
   let sendMsg = (e) => {
-    socket.emit('chat message', {
-      username: props.username,
-      text: userMsg
-    });
-    setUserMsg('');
+    if (userMsg.trim().length !== 0) {
+      socket.emit('chat message', {
+        username: props.username,
+        text: userMsg
+      });
+      setUserMsg('');
+    }
+  }
+
+  let handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMsg();
+    } else {
+      setUserMsg(e.target.value)
+    }
+  }
+
+  let disconnect = (e) => {
+    socket.close();
+    props.leaveChat();
   }
 
   return (<div>
@@ -35,13 +52,13 @@ export default function Chat(props) {
         </p>)}
     </div>
     <div className="message">
-      <input placeholder="What's on your mind?"
+      <textarea placeholder="What's on your mind?"
         id="chatMsgInput"
-        cols="100"
-        rows="2"
         onChange={(e) => setUserMsg(e.target.value)}
-        value={userMsg}></input>
-      <button className="btn" onClick={sendMsg}>Send</button>
+        onKeyDown={handleKeyDown}
+        value={userMsg}></textarea>
+      <button className="bg-green" onClick={sendMsg}>Send</button>
+      <button className="bg-red" onClick={disconnect}>Leave Chat</button>
     </div>
   </div>);
 }

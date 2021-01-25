@@ -22,30 +22,23 @@ let messages = [
   }
 ]
 
-// app.get("/messages", (req, res) => {
-//   console.log("REQUEST RECEIVED");
-//   res.json(messages);
-// });
-
 io.on('connection', (socket) => {
   console.log('a user connected');
-  // socket.on('join chat', (msg) => {
-  //   socket.username = msg.username;
-  //   const joinMsg = `${msg.username} has joined the chat`;
-  //   console.log(joinMsg);
-  //   io.emit('chat message', {username: msg.username, text: null, joined: true});
-  // });
+  socket.on('join chat', (msg) => {
+    socket.username = msg.username;
+    const joinMsg = `${msg.username} has joined the chat`;
+    console.log(joinMsg);
+    io.emit('chat message', {username: msg.username, text: null, joined: true});
+  });
   socket.on('chat message', (msg) => {
     console.log(`broadcasting message: ${JSON.stringify(msg)}`)
     io.emit('chat message', msg);
   });
   socket.on('disconnect', () => {
-    console.log('user disconnected');
-    // io.emit('chat message', {username: socket.username, text: null, joined: false});
+    console.log(`${socket.username} disconnected`);
+    io.emit('chat message', {username: socket.username, text: null, joined: false});
   })
 });
 
 io.listen(PORT);
-// , () => {
-  console.log(`Chat app backend listening at port ${PORT}`);
-// })
+console.log(`Chat app backend listening at port ${PORT}`);
